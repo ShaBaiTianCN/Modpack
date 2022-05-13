@@ -1,5 +1,8 @@
 name: PR Packer
-on: pull_request
+on:
+  pull_request:
+    branches:    
+      - 'releases/**'
 
 jobs:
   pack:
