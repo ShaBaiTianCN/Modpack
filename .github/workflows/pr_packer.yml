@@ -1,8 +1,5 @@
 name: PR Packer
-on:
-  pull_request_target:
-    branches:    
-      - 'releases/**'
+on: pull_request_target
 
 jobs:
   pack:
@@ -12,6 +9,8 @@ jobs:
     steps:
       - name: Check Out
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v2
