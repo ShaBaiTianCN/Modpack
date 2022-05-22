@@ -8,14 +8,14 @@ jobs:
 
     steps:
       - name: Check Out
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - name: Install Dependencies
         run: |
@@ -27,10 +27,9 @@ jobs:
         env:
           version: "#${{ github.event.number }}"
         run: python Packer.py
-      
+
       - name: Unzip Files
-        run: |
-          unzip "temp/${{ steps.pack.outputs.release_name }}.zip" -d ${{ github.event.number }}
+        run: unzip "temp/${{ steps.pack.outputs.release_name }}.zip" -d ${{ github.event.number }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
