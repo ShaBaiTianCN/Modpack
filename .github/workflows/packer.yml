@@ -70,7 +70,7 @@ jobs:
           path: ${{ needs.pack.outputs.release_name }}
 
       - name: Zip
-        run: zip -r ${{ needs.pack.outputs.release_name }}.zip ${{ needs.pack.outputs.release_name }}
+        run: cd ${{ needs.pack.outputs.release_name }} && zip -r ../${{ needs.pack.outputs.release_name }}.zip ./* && cd ..
 
       - name: Create Release
         id: create_release
