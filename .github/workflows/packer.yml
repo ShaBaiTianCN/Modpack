@@ -22,11 +22,11 @@ jobs:
       release_name: ${{ steps.pack.outputs.release_name }}
 
     steps:
-      - name: Check Out master
+      - name: Checkout master
         uses: actions/checkout@v3
         if: github.event_name == 'workflow_dispatch'
 
-      - name: Check Out ${{ github.event.pull_request.head.sha }}
+      - name: Checkout ${{ github.event.pull_request.head.sha }}
         uses: actions/checkout@v3
         if: github.event_name == 'pull_request_target'
         with:
@@ -63,6 +63,9 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
@@ -72,25 +75,18 @@ jobs:
       - name: Zip
         run: cd ${{ needs.pack.outputs.release_name }} && zip -r ../${{ needs.pack.outputs.release_name }}.zip ./* && cd ..
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create and Upload
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: ${{ needs.pack.outputs.release_name }}
-          prerelease: ${{ github.event.inputs.pre_release }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ github.event.inputs.version }} ${{ needs.pack.outputs.release_name }}.zip --title ${{ needs.pack.outputs.release_name }}
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Mark Prerelease
+        if: ${{ github.event.inputs.pre_release == 'true' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ needs.pack.outputs.release_name }}.zip
-          asset_name: ${{ needs.pack.outputs.release_name }}.zip
-          asset_content_type: application/zip
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit ${{ github.event.inputs.version }} --prerelease
 
   comment-pr:
     runs-on: ubuntu-latest
